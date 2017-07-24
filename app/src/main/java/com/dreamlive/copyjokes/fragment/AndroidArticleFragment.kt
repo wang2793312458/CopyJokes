@@ -1,12 +1,17 @@
-package com.dreamlive.copyjokes
+package com.dreamlive.copyjokes.fragment
 
+import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.widget.Toast
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import com.chad.library.adapter.base.BaseQuickAdapter
+import com.dreamlive.copyjokes.R
+import com.dreamlive.copyjokes.activity.WebViewActivity
 import com.dreamlive.jokes.adapter.AndroidArticleAdapter
 import com.dreamlive.jokes.entity.AndroidAricle
 import com.dreamlive.jokes.retrofit.RetrofitFactory
@@ -15,7 +20,7 @@ import rx.Scheduler
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 
-class MainActivity : AppCompatActivity(), BaseQuickAdapter.RequestLoadMoreListener, SwipeRefreshLayout.OnRefreshListener {
+class AndroidArticleFragment : Fragment(), BaseQuickAdapter.RequestLoadMoreListener, SwipeRefreshLayout.OnRefreshListener {
     override fun onLoadMoreRequested() {
         ++mPage
         requestData()
@@ -28,6 +33,7 @@ class MainActivity : AppCompatActivity(), BaseQuickAdapter.RequestLoadMoreListen
         requestData()
     }
 
+    lateinit var rootView: View
     lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
     lateinit var mRecyclerView: RecyclerView
     lateinit var mLayoutManager: LinearLayoutManager
@@ -39,19 +45,24 @@ class MainActivity : AppCompatActivity(), BaseQuickAdapter.RequestLoadMoreListen
     var mPageSize: Int = 8//默认返回条数，最大20条
     internal var mAdapter: AndroidArticleAdapter? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        rootView = inflater!!.inflate(R.layout.content_main, container, false)
         initView()
         initAction()
+        return rootView
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         requestData()
     }
 
-    private fun initView() {
-        mSwipeRefreshLayout = findViewById(R.id.main_srl) as SwipeRefreshLayout
-        mRecyclerView = findViewById(R.id.main_rv) as RecyclerView
 
-        mLayoutManager = LinearLayoutManager(this)
+    private fun initView() {
+        mSwipeRefreshLayout = rootView.findViewById(R.id.main_srl) as SwipeRefreshLayout
+        mRecyclerView = rootView.findViewById(R.id.main_rv) as RecyclerView
+        mLayoutManager = LinearLayoutManager(context)
         mLayoutManager.orientation = LinearLayoutManager.VERTICAL
         mRecyclerView.layoutManager = mLayoutManager
 
@@ -62,10 +73,15 @@ class MainActivity : AppCompatActivity(), BaseQuickAdapter.RequestLoadMoreListen
 
     private fun initAction() {
         mSwipeRefreshLayout.setOnRefreshListener(this)
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent)
         mAdapter!!.openLoadAnimation(BaseQuickAdapter.SLIDEIN_LEFT)//item从左往右加载动画
         mAdapter!!.setOnLoadMoreListener(this, mRecyclerView)
-        mAdapter!!.setOnItemChildClickListener { adapter, view, position ->
-            Toast.makeText(this, "" + mAdapter!!.data.get(position)._id, Toast.LENGTH_SHORT)
+        mAdapter!!.setOnItemClickListener { adapter, view, position ->
+            val intent = Intent(context, WebViewActivity::class.java)
+            intent.putExtra("title", mAdapter!!.data.get(position).desc)
+            intent.putExtra("url", mAdapter!!.data.get(position).url)
+            startActivity(intent)
+
         }
     }
 
