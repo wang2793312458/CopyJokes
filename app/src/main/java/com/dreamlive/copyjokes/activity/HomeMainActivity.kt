@@ -26,7 +26,7 @@ class HomeMainActivity : AppCompatActivity(), OnNavigationItemSelectedListener {
 
     var touchSlop: Int = 10
 
-    lateinit var mToolbar: Toolbar //定义变量，lateinit 延迟初始化
+    lateinit var mToolbar: Toolbar //定义变量，lateinit 延迟初始化,只能在变量上，不能在val上
 
     lateinit var mViewPager: ViewPager
 
@@ -116,7 +116,6 @@ class HomeMainActivity : AppCompatActivity(), OnNavigationItemSelectedListener {
         mTabLayout.addTab(mTabLayout.newTab().setText(tabList.get(2)))
 
         var listFragment: MutableList<Fragment> = ArrayList<Fragment>()
-        listFragment.add(AndroidArticleFragment())
         listFragment.add(AndroidArticleFragment())
         listFragment.add(WelfareFragment())
         listFragment.add(SearchFragment())
